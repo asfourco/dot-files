@@ -1,80 +1,70 @@
 " Use Vim settings, rather then Vi settings (much better!).
 " This must be first, because it changes other options as a side effect.
 set nocompatible
+filetype off
 
-" {{{ Setting up Vundle - the vim plugin bundler
-  let iCanHazVundle=1
-  let vundle_readme=expand('~/.vim/bundle/vundle/README.md')
-  if !filereadable(vundle_readme)
-    echo "Installing Vundle.."
-    echo ""
-    silent !mkdir -p ~/.vim/bundle
-    silent !git clone https://github.com/gmarik/vundle ~/.vim/bundle/vundle
-    let iCanHazVundle=0
-  endif
-  set rtp+=~/.vim/bundle/vundle/
-  call vundle#rc()
-  Bundle 'gmarik/vundle'
-  " add your bundles below
-  Bundle 'Lokaltog/vim-easymotion'
-  Bundle 'Lokaltog/vim-powerline'
-  Bundle 'Lokaltog/vim-distinguished' 
-  Bundle 'jngeist/vim-multimarkdown'
-  Bundle 'vim-scripts/searchfold.vim'
-  Bundle 'ddollar/nerdcommenter'
-  Bundle 'tpope/vim-vividchalk'
-  Bundle 'altercation/vim-colors-solarized'
-  Bundle 'sukima/xmledit'
-  Bundle 'sophacles/vim-bundle-mako'
-  Bundle 'plasticboy/vim-markdown'
-  Bundle 'jelera/vim-javascript-syntax'
-  Bundle 'pangloss/vim-javascript'
-  Bundle 'nathanaelkane/vim-indent-guides'
-  Bundle 'Raimondi/delimitMate'
-  Bundle 'scrooloose/syntastic'
-  Bundle 'tpope/vim-unimpaired'
-  Bundle 'maksimr/vim-jsbeautify' 
-  Bundle 'einars/js-beautify'
-  Bundle 'elzr/vim-json'
-  " add your bundles above
-  if iCanHazVundle == 0
-    echo "Installing Bundles, please ignore key map error messages"
-    echo ""
-    :BundleInstall
-  endif
-" }}}
+" ----------------------------------------------------------------------------
+" Bundle/plugins 
+" ----------------------------------------------------------------------------
 
-" {{{ Setting up RestoreCursor capability
-  function! RestoreCursor()
-    if line("'\"") <= line("$")
-      normal! g`"
-      return 1
-    endif
-  endfunction
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
 
-  augroup RestoreCursor
-    autocmd!
-    autocmd BufWinEnter * call RestoreCursor()
-  augroup END
-" }}}
+Plugin 'VundleVim/Vundle.vim'
 
+Plugin 'vim-scripts/searchfold.vim'
+Plugin 'Lokaltog/vim-easymotion'
+Plugin 'nathanaelkane/vim-indent-guides'
+Plugin 'Lokaltog/vim-powerline'
+Plugin 'sukima/xmledit'
+Plugin 'sophacles/vim-bundle-mako'
+Plugin 'godlygeek/tabular'
+Plugin 'plasticboy/vim-markdown'
+Plugin 'jelera/vim-javascript-syntax'
+Plugin 'Raimondi/delimitMate'
+Plugin 'scrooloose/syntastic'
+Plugin 'tpope/vim-unimpaired'
+Plugin 'maksimr/vim-jsbeautify' 
+Plugin 'einars/js-beautify'
+Plugin 'pangloss/vim-javascript'
+Plugin 'mxw/vim-jsx'
+Plugin 'tpope/vim-fugitive'
+Plugin 'crusoexia/vim-monokai'
+Plugin 'tpope/vim-vividchalk'
+Plugin 'Lokaltog/vim-distinguished' 
+Plugin 'altercation/vim-colors-solarized'
+Plugin 'jnurmine/Zenburn'
+Plugin 'vim-scripts/indentpython.vim'
+Plugin 'Valloric/YouCompleteMe'
+Plugin 'nvie/vim-flake8'
+Plugin 'scrooloose/nerdtree'
+Plugin 'kien/ctrlp.vim'
+Plugin 'tmhedberg/SimpylFold'
+
+call vundle#end()
+filetype plugin indent on
+
+" ----------------------------------------------------------------------------
+" Editor settings 
+" ----------------------------------------------------------------------------
 set modeline
 set modelines=2
 set laststatus=2
 set encoding=utf-8
-
+set backupcopy=yes
 set hlsearch
 set incsearch
 set ignorecase
 set smartcase
-set smartindent
 set number
-
+set autoread
 set t_Co=256
-set background=dark
-colorscheme vividchalk
-"colorscheme distinguished
+set mouse=a
 syntax on
+"set background=dark
+colorscheme monokai
+hi normal ctermbg=none
+hi nonText ctermbg=none
 
 " delimitMate
 let delimitMate_expand_cr=1
@@ -82,49 +72,96 @@ imap <C-c> <CR><Esc>0
 
 " syntastic
 let g:syntastic_check_on_open=1
-  let g:syntastic_mode_map={
-    \'mode': 'active',
-    \'active_filetypes': [],
-    \'passive_filetypes': ['html', 'cpp', 'java', 'scala']
-  \}
 
-" java
-augroup java
-  autocmd!
-  autocmd FileType java set ts=4 sw=4 et sm si ai sta
-augroup END
+" view invisible characters
+set listchars=eol:¬,tab:>-,trail:·,extends:>,precedes:<
+set list
 
-" default
-"set ts=4 sw=4 et sm si ai sta
-set ts=2 sw=2 et sm si ai sta
-
-" xslt
-augroup xslt
-  autocmd!
-  autocmd FileType xslt set ts=2 sw=2 et sm si ai sta
-augroup END
-
+" ----------------------------------------------------------------------------
+" Javascript settings
+" ----------------------------------------------------------------------------
 " jsBeautify
-  let g:EditorConfig_core_mode = 'external_command'
-  "let g:editorconfig_Beautifier='~/.vim/.editorconfig'
+let g:EditorConfig_core_mode = 'external_command'
+"let g:editorconfig_Beautifier='~/.vim/.editorconfig'
 
-  "let g:jsbeautify = {"indent_size": 2, "indent_char": "\t"}
-  " for JS
-  autocmd FileType javascript noremap <buffer>  <c-f> :call JsBeautify()<cr>
-  " for html
-  autocmd FileType html noremap <buffer> <c-f> :call HtmlBeautify()<cr>
-  " for css or scss
-  autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
+"let g:jsbeautify = {"indent_size": 2, "indent_char": "\t"}
+" for JS
+autocmd FileType javascript noremap <buffer>  <c-f> :call JsBeautify()<cr>
+" for html
+autocmd FileType html noremap <buffer> <c-f> :call HtmlBeautify()<cr>
+" for css or scss
+autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
+
+" ES6 setup
+let g:jsx_ext_required = 0
+let g:syntastic_javascript_checkers = ['eslint']
+
+" ----------------------------------------------------------------------------
+" Tabbing/Indentation
+" ----------------------------------------------------------------------------
+set expandtab
+set shiftwidth=2
+set softtabstop=2
+set tabstop=2
+set noshiftround
+set smarttab
 
 " indent guides
-  nnoremap <silent> <leader>i :IndentGuidesToggle<CR>
-  let g:indent_guides_enable_on_vim_startup=0
-  let g:indent_guides_auto_colors=0
-  let g:indent_guides_start_level=2
-  let g:indent_guides_guide_size=1
-  
-  augroup IndentGuideColors
-    autocmd!
-    autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermfg=white ctermbg=234
-    autocmd VimEnter,Colorscheme * :hi IndentGuidesEven ctermfg=white ctermbg=236
-  augroup END
+nnoremap <silent> <leader>i :IndentGuidesToggle<CR>
+let g:indent_guides_enable_on_vim_startup=0
+let g:indent_guides_auto_colors=0
+let g:indent_guides_start_level=2
+let g:indent_guides_guide_size=1
+
+augroup IndentGuideColors
+  autocmd!
+  autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd ctermfg=white ctermbg=234
+  autocmd VimEnter,Colorscheme * :hi IndentGuidesEven ctermfg=white ctermbg=236
+augroup END
+
+" ----------------------------------------------------------------------------
+" Python PEP8 setup
+" ----------------------------------------------------------------------------
+au BufNewFile,BufRead *.py
+    \ set tabstop=4 |
+    \ set softtabstop=4 |
+    \ set shiftwidth=4 |
+    \ set textwidth=120 |
+    \ set expandtab |
+    \ set autoindent |
+    \ set fileformat=unix |
+    \ set foldmethod=indent |
+    \ set foldlevel=99
+
+" ----------------------------------------------------------------------------
+" Vim as an IDE setup
+" ----------------------------------------------------------------------------
+let g:ycm_autoclose_preview_window_after_completion=1
+map <leader>g  :YcmCompleter GoToDefinitionElseDeclaration<CR>
+
+let NERDTreeIgnore=['\.pyc$', '\~$'] "ignore files in NERDTree
+map <C-n> :NERDTreeToggle<CR>
+
+
+" ----------------------------------------------------------------------------
+" Wild and file globbing stuff in command mode
+" ----------------------------------------------------------------------------
+
+" Binary
+set wildignore+=*.aux,*.out,*.toc
+set wildignore+=*.o,*.obj,*.exe,*.dll,*.jar,*.pyc,*.rbc,*.class
+set wildignore+=*.ai,*.bmp,*.gif,*.ico,*.jpg,*.jpeg,*.png,*.psd,*.webp
+set wildignore+=*.avi,*.m4a,*.mp3,*.oga,*.ogg,*.wav,*.webm
+set wildignore+=*.eot,*.otf,*.ttf,*.woff
+set wildignore+=*.doc,*.pdf
+set wildignore+=*.zip,*.tar.gz,*.tar.bz2,*.rar,*.tar.xz
+" Cache
+set wildignore+=.sass-cache
+set wildignore+=*/vendor/gems/*,*/vendor/cache/*,*/.bundle/*,*.gem
+" Compiled
+set wildignore+=*.min.*
+" Temp/System
+set wildignore+=*.*~,*~
+set wildignore+=*.swp,.lock,.DS_Store,._*,tags.lock
+
+autocmd VimEnter * redraw!
