@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+## Define which ollama to use
+
+#OLLAMA_DIR=$HOME/.local/share/ollama
+OLLAM_DIR=/usr/bin
+OLLAMA_CMD=${OLLAMA_DIR}/ollama
+
+container_name="open-webui"
+pidfile=$HOME/.local/run/ollama.pid
+logfile=$HOME/.local/log/ollama.log
+
+prog='open-webui'
+
+RETVAL=0
+
+start() {
+    echo $"Starting ollama"
+#    export HSA_OVERRIDE_GFX_VERSION=11.0.0
+    ${OLLAMA_CMD} serve >$logfile 2>&1 &
+    echo $! >$pidfile
+    echo $"Starting docker:open-webui"
+    docker run -d \
+        --network=host \
+        -e OLLAMA_BASE_URL=http://127.0.0.1:11434 \
+        -e WEBUI_AUTH=False \
+        -v open-webui:/app/backend/data \
+        --restart always \
+        --name ${container_name} \
+        ghcr.io/open-webui/open-webui:main
+}
+
+stop() {
+    if [ "$(docker ps -q -f name=${container_name})" ]; then
+        echo $"Stopping docker:open-wbui"
+        docker stop open-webui > /dev/null
+        docker rm open-webui > /dev/null
+    else
+        echo $"Docker container open-webui not running, skipping"
+    fi
+
+    echo $"Stopping Ollama"
+    if [ -f ${pidfile} ]; then
+        kill $(cat ${pidfile})
+        rm -f ${pidfile}
+    else
+        echo $"Ollama pidfile not found, skipping"
+    fi
+}
+
+status() {
+    if [ -f ${pidfile} ]; then
+        ps -p $(cat ${pidfile}) >/dev/null
+        RETVAL=$?
+        echo $"Ollama server is running"
+    else
+        echo $"Ollama server not running"
+    fi
+
+    if [ "$(docker ps -q -f name=${container_name})" ]; then
+        container_status="$(docker container inspect -f '{{.State.Status}}' $container_name)"
+        echo $"Open-webui docker container status ${container_status}"
+    else
+        echo $"Open-webui docker container not running"
+    fi
+}
+
+case "$1" in
+start)
+    start
+    tail -f ${logfile}
+    ;;
+stop)
+    stop
+    ;;
+status)
+    status
+    ;;
+restart)
+    stop
+    start
+    ;;
+logs)
+    tail -f ${logfile}
+    ;;
+*)
+    echo $"Usage: $prog {start|stop|restart|status|logs}"
+    exit 1
+    ;;
+esac
+
+exit $RETVAL
